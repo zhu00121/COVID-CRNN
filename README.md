@@ -20,7 +20,7 @@ This saliency map is designed to capture important regions in modulation tensorg
 
 Code locations: []
 
-## Cite info
+## Citation
 Our paper is currently under review, but you may cite the preprint version of it:
 
 ## Contact info
