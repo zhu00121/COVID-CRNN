@@ -33,47 +33,8 @@ from sklearn.metrics import confusion_matrix
 import seaborn as sns
 from sklearn import metrics
 from sklearn.preprocessing import StandardScaler
+
 # %% Dataloader
-class srmr_dataset(Dataset):
-    
-    def __init__(self,dataset:str,split):
-        
-        assert dataset in ['compare','dicova'], 'unknown dataset!'
-        srmr_data = load_saved_fea('srmr_%s_speech'%(dataset))
-        srmr_label = load_saved_fea('%s_lab_speech'%(dataset))
-        assert srmr_data.shape[0] == srmr_label.shape[0], 'data size does not match label size!'
-        
-        if srmr_label.ndim != 2:
-            srmr_label = srmr_label.reshape(srmr_label.shape[0],1)
-        # reshape data to image shape
-        srmr_data = np.reshape(srmr_data.copy(),(srmr_data.shape[0],1,23,8))
-        
-        x_train,x_test,y_train,y_test = train_test_split(srmr_data,srmr_label,test_size=0.2,random_state=26)
-        x_train,x_val,y_train,y_val = train_test_split(x_train,y_train,test_size=0.2,random_state=26)
-        
-        if split == 'train':
-            self.data = x_train
-            self.label = y_train
-        elif split == 'valid':
-            self.data = x_val
-            self.label= y_val
-        elif split == 'test':
-            self.data = x_test
-            self.label = y_test
-        elif split == 'all':
-            self.data = srmr_data
-            self.label = srmr_label
-        
-    def __getitem__(self,idx):
-        data = torch.FloatTensor(self.data[idx])
-        label = torch.FloatTensor(self.label[idx])
-        sample = {"data": data, "label": label}
-        return sample
-    
-    def __len__(self):
-        return self.data.shape[0]
-
-
 def weighted_sampler(lab):
     """
     Parameters
@@ -93,7 +54,6 @@ def weighted_sampler(lab):
     samples_weight = torch.from_numpy(samples_weight)
     
     return WeightedRandomSampler(samples_weight, len(samples_weight))
-
 
 def minmax_scaler(data):
     
@@ -204,212 +164,7 @@ def add_random_slice(data_og,
         new_lab = np.concatenate((new_lab,lab_og),axis=0)
     
     return new_data, new_lab
-
-class cam_dataset(Dataset):
-    
-    def __init__(self,
-                 dataset:str,
-                 modality:str,
-                 split:str,
-                 scale:str='minmax',
-                 set_up=None,
-                 attention:tuple=None,
-                 data_aug=False,
-                 filters=None,
-                 mask=None):
-        
-        assert dataset == 'cam', 'unknown dataset!'
-        srmr_data = load_saved_fea('msr_gamma_%s_%s_%s' % (dataset,modality,split))
-        srmr_label = load_saved_fea('%s_lab_%s' % (dataset,split))
-        assert srmr_data.shape[0] == srmr_label.shape[0], 'data size does not match label size!'
-        assert srmr_data.ndim == 4, 'incorrect msr size!'
-        
-        if srmr_label.ndim != 2:
-            srmr_label = srmr_label.reshape(srmr_label.shape[0],1)
-        
-        # reshape data for downstream model
-        srmr_data = np.moveaxis(srmr_data,[1,2,3],[2,3,1])
-        srmr_data = srmr_data[:,np.newaxis,...]
-        
-        # add attention if needed
-        # example: attention = ((0,23),(0,8)) -> original shape
-        if attention:
-            freq_low = attention[0][0]
-            freq_upper = attention[0][1]
-            mod_low = attention[1][0]
-            mod_upper = attention[1][1]
-            
-            assert freq_low >=0 and freq_upper <=23, "incorrect frequency range"
-            assert mod_low >=0 and mod_upper <=8, "incorrect modulation frequency range"
-            
-            srmr_data = srmr_data[:,:,:,freq_low:freq_upper,mod_low:mod_upper]
-        
-        if mask is not None:
-            srmr_data = multi_mask(x=srmr_data,
-                                   hei=23,wid=8,
-                                   masks=mask)
-        if filters is not None:
-            srmr_data = multi_filter(x=srmr_data,
-                                     hei=23,wid=8,
-                                     filters=filters)
-            
-        self.data = srmr_data
-        self.label = srmr_label
-        
-        if data_aug:
-            self.data,self.label = spec_aug_generator(self.data,self.label)
-        
-
-            
-    def __getitem__(self,idx):
-        data = torch.FloatTensor(self.data[idx])
-        label = torch.FloatTensor(self.label[idx])
-        sample = {"data": data, "label": label}
-        return sample
-    
-    def __len__(self):
-        return self.data.shape[0]
-    
-
-class msf_linear_dataset(Dataset):
-    
-    def __init__(self,
-                 dataset:str,modality:str,
-                 split:str,fold_num:int,
-                 scale:str='minmax',
-                 set_up=None,
-                 attention:tuple=None,
-                 test_size=0.2,valid_size=0.2,
-                 data_aug=False,add_rand=False):
-        
-        assert dataset in ['compare','dicova'], 'unknown dataset!'
-        msf_data = load_saved_fea(fea_name='msf_linear_%s_%s' % (dataset,modality))
-        msf_label = load_saved_fea('%s_lab_%s' % (dataset,modality))
-        assert msf_data.shape[0] == msf_label.shape[0], 'data size does not match label size!'
-        msf_data = msf_data[:,:150,:400].reshape((msf_data.shape[0],150,20,20)) # keep only MSR energies
-        assert msf_data.ndim == 4, 'incorrect data size!'
-        
-        if msf_label.ndim != 2:
-            msf_label = msf_label.reshape(msf_label.shape[0],1)
-        
-        # reshape data for downstream model
-        msf_data = msf_data[:,np.newaxis,...] #insert channel axis
-        
-        # add attention if needed
-        # example: attention = ((0,20),(0,20)) -> original shape
-        if attention:
-            freq_low = attention[0][0]
-            freq_upper = attention[0][1]
-            mod_low = attention[1][0]
-            mod_upper = attention[1][1]
-            
-            assert freq_low >=0 and freq_upper <=20, "incorrect frequency range"
-            assert mod_low >=0 and mod_upper <=20, "incorrect modulation frequency range"
-            
-            msf_data = msf_data[:,:,:,freq_low:freq_upper,mod_low:mod_upper]
-
-        # scale data
-        if scale == 'minmax':
-            msf_data_scale = minmax_scaler(msf_data)
-        elif scale == 'standard':
-            msf_data_scale = standard_scaler(msf_data)
-        elif scale== None:
-            msf_data_scale = msf_data
-            
-
-        if set_up is None:
-            x_train,x_test,y_train,y_test = train_test_split(msf_data_scale,msf_label,test_size=test_size,random_state=26)
-            x_train,x_val,y_train,y_val = train_test_split(x_train,y_train,test_size=valid_size,random_state=26)
-            
-            if split == 'train':
-                self.data = x_train
-                self.label = y_train
-            elif split == 'valid':
-                self.data = x_val
-                self.label= y_val
-            elif split == 'test':
-                self.data = x_test
-                self.label = y_test
-            elif split == 'all':
-                self.data = msf_data_scale
-                self.label = msf_label
-
-                
-        elif set_up == 'compare':
-            x_train, y_train = msf_data_scale[:299],msf_label[:299]
-            x_val, y_val = msf_data_scale[299:-276],msf_label[299:-276]
-            x_test, y_test = msf_data_scale[-276:],msf_label[-276:]
-            
-            if split == 'train':
-                self.data = x_train
-                self.label = y_train
-            elif split == 'valid':
-                self.data = x_val
-                self.label= y_val
-            elif split == 'test':
-                self.data = x_test
-                self.label = y_test
-            elif split == 'all':
-                self.data = np.concatenate((x_train,x_val))
-                self.label = np.concatenate((y_train,y_val))
-            elif split == 'tr_vl':
-                self.data = np.concatenate((x_train,x_val))
-                self.label = np.concatenate((y_train,y_val))
-            elif split == 'tr_ts':
-                self.data = np.concatenate((x_train,x_test))
-                self.label = np.concatenate((y_train,y_test))
-                
-            
-        elif set_up == 'dicova':
-            if split == 'train' or 'valid':
-                filename = 'train_'+str(fold_num)
-                idx = self.load_idx(filename)
-                self.data = msf_data_scale[idx]
-                self.label = msf_label[idx]
-                # x_train,x_val,y_train,y_val = train_test_split(srmr_data[idx],srmr_label[idx],test_size=0.2,random_state=26)
-                
-                # if split == 'train':
-                #     self.data = x_train
-                #     self.label = y_train
-                # elif split == 'valid':
-                #     self.data = x_val
-                #     self.label = y_val
-                    
-            if split =='test':
-                filename = 'val_'+str(fold_num)
-                idx = self.load_idx(filename)
-                self.data = msf_data_scale[idx]
-                self.label = msf_label[idx]
-        
-        if data_aug:
-            self.data,self.label = spec_aug_generator(self.data,self.label)
-        
-        if add_rand:
-            self.data, self.label = add_random_slice(self.data, self.label)
-    
-    def __getitem__(self,idx):
-        data = torch.FloatTensor(self.data[idx])
-        label = torch.FloatTensor(self.label[idx])
-        sample = {"data": data, "label": label}
-        return sample
-    
-    def __len__(self):
-        return self.data.shape[0]
-    
-    def load_idx(self,split_name:str):
-
-        path_list = '/home/zhu/project/COVID/DNN/Saleincy/data/LISTS'
-        fold_list = pd.read_csv(os.path.join(path_list,'%s.csv'%(split_name)), header=None, delimiter = r"\s+")
-        df_label = ip_DSS_lab()
-        
-        idx_list = []
-        
-        for i,filename in enumerate(fold_list.iloc[:,0]):
-            current_idx = df_label[df_label.SUB_ID=='%s'%(filename)].index.values.astype(int)
-            idx_list.append(current_idx)
-        
-        return np.array(idx_list)[:,0]
-
+                         
     
 class msr_gamma_dataset(Dataset):
     
@@ -438,22 +193,9 @@ class msr_gamma_dataset(Dataset):
         # reshape data for downstream model
         srmr_data = np.moveaxis(srmr_data,[1,2,3],[2,3,1])
         srmr_data = srmr_data[:,np.newaxis,...]
-        
-        # add attention if needed
-        # example: attention = ((0,23),(0,8)) -> original shape
-        if attention:
-            freq_low = attention[0][0]
-            freq_upper = attention[0][1]
-            mod_low = attention[1][0]
-            mod_upper = attention[1][1]
-            
-            assert freq_low >=0 and freq_upper <=23, "incorrect frequency range"
-            assert mod_low >=0 and mod_upper <=8, "incorrect modulation frequency range"
-            
-            srmr_data = srmr_data[:,:,:,freq_low:freq_upper,mod_low:mod_upper]
-
             
         srmr_data = 20*np.log10(srmr_data)
+                     
         # scale data
         if scale == 'minmax':
             srmr_data_scale = minmax_scaler(srmr_data)
@@ -519,21 +261,13 @@ class msr_gamma_dataset(Dataset):
                 
             
         elif set_up == 'dicova':
-            if split == 'train' or 'valid':
+            if split == 'train':
                 filename = 'train_'+str(fold_num)
                 idx = self.load_idx(filename)
                 self.data = srmr_data[idx]
                 self.label = srmr_label[idx]
-                # x_train,x_val,y_train,y_val = train_test_split(srmr_data[idx],srmr_label[idx],test_size=0.2,random_state=26)
-                
-                # if split == 'train':
-                #     self.data = x_train
-                #     self.label = y_train
-                # elif split == 'valid':
-                #     self.data = x_val
-                #     self.label = y_val
                     
-            if split =='test':
+            elif split =='test':
                 filename = 'val_'+str(fold_num)
                 idx = self.load_idx(filename)
                 self.data = srmr_data[idx]
@@ -568,16 +302,7 @@ class msr_gamma_dataset(Dataset):
         
         return np.array(idx_list)[:,0]
 
-
-def split_set(dataset,portion:float):
-    assert isinstance(portion, float), "portion needs to be between 0 and 1"
-    # Split the indices in a stratified way
-    indices = np.arange(len(dataset))
-    train_indices,_ = train_test_split(indices, train_size=portion, stratify=dataset.label)
-    # Warp into Subsets
-    portioned_dataset = Subset(dataset, train_indices)
-    
-    return portioned_dataset
+############################################################################################
 # %% Model
 class cnn_cov(nn.Module):
     
