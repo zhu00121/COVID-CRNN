@@ -11,7 +11,7 @@ We use modulation tensorgram as a novel representation of speech. This represent
 Code location: [] and []
 
 ## Model architecture
-A convolutional-recurrent network is used to analyze the modulation tensorgram input. This is because modulation tensorgram is essentially a 3D representation. The 3D convolutional block is used to aggregates spatial and temporal information, while the cascaded RNN processes the temporal dynamics. The whole model is very light-weight with only 0.9 million parameters (similar to a BiLSTM if using spectrogram as input). The model is depicted in the figure below.
+A convolutional-recurrent network is used to analyze the modulation tensorgram input. This is because modulation tensorgram is essentially a 3D representation. The 3D convolutional block is used to aggregates spatial and temporal information, while the cascaded RNN processes the temporal dynamics. The whole model is very light-weight with only 0.9 million parameters (similar to a BiLSTM if using spectrogram as input) owing to the compactness of modulation tensorgram. The model is depicted in the figure below.
 
 Code location: []
 
