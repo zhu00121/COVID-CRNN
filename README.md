@@ -19,3 +19,9 @@ Code location: []
 This saliency map is designed to capture important regions in modulation tensorgram by incorporating temporal saliency. Although it is here applied to our COVID-CRNN model, the computation can be used together with any models with a CNN and RNN block.
 
 Code locations: []
+
+## Cite info
+Our paper is currently under review, but you may cite the preprint version of it:
+
+## Contact info
+If you have any questions, do not hesitate to contact me at Yi.Zhu@inrs.ca. More work on speech applications can also be found at [].
