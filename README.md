@@ -8,7 +8,7 @@ Note that for ComParE, several COVID-positive recordings were with a different s
 ## Feature extraction
 We use modulation tensorgram as a novel representation of speech. This representation can be extracted using a one-line code. We release the code/toolboxes for two versions of modulation tensorgrams, both were experimented in our study. Note that although the experiments in this paper showed the former was better for DiCOVA2 and ComParE, the latter together with a linear SVM achieved comparable performance to a fintuned VGGish network (which is reported in our TASLP paper []). Hence, we encourage interested readers to try both for your own implementation.
 
-Code location: [] and []
+Code location: [SRMR toolbox](https://github.com/MuSAELab/SRMRToolbox) and [Modbank toolbox](https://github.com/MuSAELab/modulation_filterbanks)
 
 ## Model architecture
 A convolutional-recurrent network is used to analyze the modulation tensorgram input. This is because modulation tensorgram is essentially a 3D representation. The 3D convolutional block is used to aggregates spatial and temporal information, while the cascaded RNN processes the temporal dynamics. The whole model is very light-weight with only 0.9 million parameters (similar to a BiLSTM if using spectrogram as input) owing to the compactness of modulation tensorgram. The model is depicted in the figure below.
