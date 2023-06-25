@@ -274,7 +274,7 @@ if __name__ == "__main__":
     # load model and calculate saliency; note that you will need to construct your own dataset module
     device = torch.device('cuda')
     model = cnn_covid.crnn_cov_3d(1,(23,8),128,0.7,tem_fac=[2,3,1]).to(device)
-    model.load_state_dict(torch.load('./script/model_parameters.pt', map_location=device))
+    model.load_state_dict(torch.load('./script/model_params.pt', map_location=device))
     saliency_list = get_saliency(train_set,model)
 
     # get maps for positive and negative groups
