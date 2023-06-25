@@ -1,9 +1,9 @@
 # Generalizable COVID-19 detection network
-This repository contains the code for feature extraction, model architecture and spectral-temporal saliency map described in the paper [].
+This repository contains the code for feature extraction, model architecture and spectral-temporal saliency map described in the paper "Spectral-Temporal Saliency Masks and Modulation Tensorgrams for Generalizable COVID-19 Detection".
 
 ## Dataset
-We used DiCOVA2 and ComParE 2021 COVID-19 Speech dataset. We do not re-distribute these data as both require approval from the data holders. However, they can be obtained by contacting the authors of the following two papers:[] and [].
-Note that for ComParE, several COVID-positive recordings were with a different sampling rate, which has been shown to lead to over-optimistic results. In our experiment, we remove these recordings. If you wish to train models on the unbiased version, you may either contact us or the authors of [] to obtain the id of these biased files.
+We used DiCOVA2 and ComParE 2021 COVID-19 Speech dataset. We do not re-distribute these data as both require approval from the data holders. However, they can be obtained by contacting the authors of [DiCOVA2](https://dicovachallenge.github.io/) and [ComParE](https://arxiv.org/abs/2102.13468).
+Note that for ComParE, several COVID-positive recordings were with a different sampling rate, which has been shown to lead to over-optimistic results. In our experiment, we remove these recordings. If you wish to train models on the unbiased version, you may either contact us or the authors of [https://arxiv.org/abs/2102.13468] to obtain the id of these biased files.
 
 ## Feature extraction
 We use modulation tensorgram as a novel representation of speech. This representation can be extracted using a one-line code. We release the code/toolboxes for two versions of modulation tensorgrams, both were experimented in our study. Note that although the experiments in this paper showed the former was better for DiCOVA2 and ComParE, the latter together with a linear SVM achieved comparable performance to a fintuned VGGish network (which is reported in our TASLP paper []). Hence, we encourage interested readers to try both for your own implementation.
@@ -22,7 +22,7 @@ This saliency map is designed to capture important regions in modulation tensorg
 Code location: [Saliency map](https://github.com/zhu00121/COVID-CRNN/blob/main/script/generate_saliency.py)
 
 ## Citation
-Our paper is currently under review, but you may cite the preprint version of it:
+Our paper is currently under review, but you may cite the (preprint version)[https://www.techrxiv.org/articles/preprint/Spectral-Temporal_Saliency_Masks_and_Modulation_Tensorgrams_for_Generalizable_COVID-19_Detection/21791837]
 
 ## Contact info
-If you have any questions, do not hesitate to contact me at Yi.Zhu@inrs.ca. More work on speech applications can also be found at [].
+If you have any questions, do not hesitate to contact me at Yi.Zhu@inrs.ca. More work on speech applications can also be found at [our lab website](https://musaelab.ca/).
