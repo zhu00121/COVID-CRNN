@@ -3,7 +3,7 @@ This repository contains the code for feature extraction, model architecture and
 
 ## Dataset
 We used DiCOVA2 and ComParE 2021 COVID-19 Speech dataset. We do not re-distribute these data as both require approval from the data holders. However, they can be obtained by contacting the authors of [DiCOVA2](https://dicovachallenge.github.io/) and [ComParE](https://arxiv.org/abs/2102.13468).
-Note that for ComParE, several COVID-positive recordings were with a different sampling rate, which has been shown to lead to over-optimistic results. In our experiment, we remove these recordings. If you wish to train models on the unbiased version, you may either contact us or the authors of [https://arxiv.org/abs/2102.13468] to obtain the id of these biased files.
+Note that for ComParE, several COVID-positive recordings were with a different sampling rate, which has been shown to lead to over-optimistic results. In our experiment, we remove these recordings. If you wish to train models on the unbiased version, you may either contact us or the authors of [ComParE Challenge](https://arxiv.org/abs/2102.13468) to obtain the id of these biased files.
 
 ## Feature extraction
 We use modulation tensorgram as a novel representation of speech. This representation can be extracted using a one-line code. We release the code/toolboxes for two versions of modulation tensorgrams, both were experimented in our study. Note that although the experiments in this paper showed the former was better for DiCOVA2 and ComParE, the latter together with a linear SVM achieved comparable performance to a fintuned VGGish network (which is reported in our TASLP paper []). Hence, we encourage interested readers to try both for your own implementation.
