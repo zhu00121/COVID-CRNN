@@ -22,7 +22,7 @@ This saliency map is designed to capture important regions in modulation tensorg
 Code location: [Saliency map](https://github.com/zhu00121/COVID-CRNN/blob/main/script/generate_saliency.py)
 
 ## Citation
-Our paper is currently under review, but you may cite the (preprint version)[https://www.techrxiv.org/articles/preprint/Spectral-Temporal_Saliency_Masks_and_Modulation_Tensorgrams_for_Generalizable_COVID-19_Detection/21791837]
+Our paper is currently under review, but you may cite the [preprint version](https://www.techrxiv.org/articles/preprint/Spectral-Temporal_Saliency_Masks_and_Modulation_Tensorgrams_for_Generalizable_COVID-19_Detection/21791837)
 
 ## Contact info
 If you have any questions, do not hesitate to contact me at Yi.Zhu@inrs.ca. More work on speech applications can also be found at [our lab website](https://musaelab.ca/).
